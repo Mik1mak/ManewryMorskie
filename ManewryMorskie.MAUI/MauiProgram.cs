@@ -29,12 +29,19 @@ namespace ManewryMorskie.MAUI
 #endif
             #region config
             Assembly a = Assembly.GetExecutingAssembly();
-            using var stream = a.GetManifestResourceStream("ManewryMorskie.MAUI.appsettings.json");
+
+            string rscName =
+#if ANDROID || IOS
+                "ManewryMorskie.MAUI.appsettings.Mobile.json";
+#else
+                "ManewryMorskie.MAUI.appsettings.json";
+#endif
+            using var stream = a.GetManifestResourceStream(rscName);
             var config = new ConfigurationBuilder()
                 .AddJsonStream(stream)
                 .Build();
             builder.Configuration.AddConfiguration(config);
-            #endregion
+#endregion
 
             builder.Services.AddManewryMorskieGame();
 

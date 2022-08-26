@@ -11,7 +11,9 @@
     <div @ref="pawnRef" class="@PawnCss" title="@(pawn.Value.LabelIsHidden ? string.Empty : pawn.Value.Label)">
         @if(!pawn.Value.LabelIsHidden)
         {
-            <div class="pawn-label" style="transform: scale(@(scale.ToString().Replace(',', '.'))">@(pawn.Value.Label)</div>
+            <div class="pawn-label"
+                style="transform: scale(@(scale.ToString().Replace(',', '.'))); margin: 0 @pawnLabelMargin 0 @pawnLabelMargin;">
+                @(pawn.Value.Label)</div>
         }
     </div>
 }
@@ -27,6 +29,7 @@
     private ElementReference pawnRef;
 
     private string scale = "1";
+    private string pawnLabelMargin = "2px";
     private Pawn? pawn;
 
     private string PawnCss
@@ -44,6 +47,7 @@
     protected override void OnInitialized()
     {
         scale = config["PawnFontScale"];
+        pawnLabelMargin = config["PawnLabelMargin"];
         Location = (CellLocation)(Column, Row);
         BoardService[Location].PawnChanged += PlacePawn;
         BoardService[Location].AnimatingPawn += AnimatePawn;
