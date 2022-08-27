@@ -34,12 +34,13 @@ namespace ManewryMorskie.TurnManagerComponents
                 currentPlayer.Fleet.Set(mine);
                 parent.map[setMineLocation].Unit = mine;
 
-                await currentPlayer.UserInterface.PlacePawn(setMineLocation, currentPlayer.Color, false, mine.ToString());
+                foreach (IUserInterface ui in parent.playerManager.UniqueInferfaces)
+                    await ui.PlacePawn(setMineLocation, currentPlayer.Color, false, mine.ToString());
 
-                if(currentPlayer.UserInterface != parent.playerManager.GetOpositePlayer().UserInterface)
-                    await parent.playerManager.GetOpositePlayer().UserInterface.PlacePawn(setMineLocation, currentPlayer.Color);
-
-                foreach ((MoveChecker? moveChecker, IList<ICellAction> actions) in parent.selectable.Values)
+                foreach ((MoveChecker? moveChecker, IList<ICellAction> actions) 
+                    in parent.selectable.Keys
+                        .Intersect(setMineLocation.SquereRegion(4))
+                        .Select(k => parent.selectable[k]))
                 {
                     actions.Clear();
 

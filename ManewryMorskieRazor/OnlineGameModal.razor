@@ -10,21 +10,19 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Gra Online</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" title="Zamknij"></button>
             </div>
             <BSForm Model="onlineModal">
                 <div class="modal-body">
-                    @*<BSValidationSummary />*@
                     <div class="mb-3 @(onlineModal.RandomRoom?"text-muted":"")">
                         <BSLabel>Nazwa Pokoju</BSLabel>
                         <BSInput DisplayName="Nazwa Pokoju" @bind-Value="onlineModal.RoomName"
                                  IsDisabled="onlineModal.RandomRoom"
-                                 AdditionalAttributes='new Attributes {{"maxlength", "16"}}'/>
+                                 AdditionalAttributes='new Attributes {{"maxlength","16"},{"placeholder","Nazwa Pokoju"},{"title","Nazwa Pokoju"}}'/>
                     </div>
                     <div class="mb-3">
-                        <InputCheckbox 
-                            DisplayName="Losowy Pokój"
-                            AdditionalAttributes='new Attributes {{"class", "form-check-input"}}'
+                        <InputCheckbox DisplayName="Losowy Pokój"
+                            AdditionalAttributes='new Attributes {{"class","form-check-input"},{"title","Losowy Pokój"}}'
                             @bind-Value="onlineModal.RandomRoom"/>
                         <BSLabel>Losowy Pokój</BSLabel>
                     </div>

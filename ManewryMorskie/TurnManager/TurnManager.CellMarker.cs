@@ -57,6 +57,9 @@ namespace ManewryMorskie.TurnManagerComponents
                     lastSelected = parent.selectedUnitLocation.Value;
                     await parent.PlayerUi.MarkCells(parent.selectedUnitLocation.Value, MarkOptions.Selected);
                 }
+
+                foreach(IUserInterface ui in parent.playerManager.UniqueInferfaces)
+                    await ui.MarkCells(parent.result.SetMines, MarkOptions.Mined);
             }
 
             public async ValueTask ClearAndMarkLastMove(IEnumerable<IUserInterface> uis, IEnumerable<CellLocation>? cellsToClear = null)

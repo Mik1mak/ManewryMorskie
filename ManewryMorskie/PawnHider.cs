@@ -52,19 +52,24 @@ namespace ManewryMorskie
                 return;
 
             Move last = executor.LastExecuted;
+            Player current = players.CurrentPlayer;
+            Player enemy = players.GetOpositePlayer();
 
             if (last.Result != BattleResult.None)
             {
-                IUserInterface ui = players.CurrentPlayer.UserInterface;
+                IUserInterface ui = current.UserInterface;
                 if(!last.Result.HasFlag(BattleResult.TargetDestroyed))
                 {
                     CellLocation l = (last.Attack ?? last.Disarm!).Value;
-                    await ui.PlacePawn(l, players.GetOpositePlayer().Color, map[l].Unit is Bateria);
+                    await ui.PlacePawn(l, enemy.Color, map[l].Unit is Bateria);
                 }
                 if(!last.Result.HasFlag(BattleResult.SourceDestroyed))
-                    await players.GetOpositePlayer()
-                        .UserInterface.PlacePawn(last.To, players.CurrentPlayer.Color, map[last.To].Unit is Bateria);
+                    await enemy
+                        .UserInterface.PlacePawn(last.To, current.Color, map[last.To].Unit is Bateria);
             }
+
+            foreach (CellLocation mineLocation in last.SetMines)
+                await enemy.UserInterface.PlacePawn(mineLocation, current.Color, false);
         }
 
         private bool LocationIsExcluded(CellLocation l)
@@ -77,7 +82,7 @@ namespace ManewryMorskie
             if (last.Result != BattleResult.None)
                 return l == (last.Attack ?? last.Disarm!).Value || l == last.To;
 
-            return false;
+            return last.SetMines.Contains(l);
         }
 
         public void Dispose()

@@ -17,11 +17,14 @@ namespace ManewryMorskie
             BottomPlayer = bottomPlayer;
             TopPlayer = topPlayer;
 
+            UniqueInferfaces = new HashSet<IUserInterface>(this.Select(x => x.UserInterface));
+
             queueOffset = new Random().Next(2);
         }
 
-        public Player TopPlayer { get; private set; }
-        public Player BottomPlayer { get; private set; }
+        public Player TopPlayer { get; }
+        public Player BottomPlayer { get; }
+        public IEnumerable<IUserInterface> UniqueInferfaces { get; }
         public Player CurrentPlayer => GetPlayerOfTurn(turnCommander.TurnNumber);
         public Player GetPlayerOfTurn(int turnNumber) => turnNumber % 2 == queueOffset ? BottomPlayer : TopPlayer;
 
@@ -44,8 +47,6 @@ namespace ManewryMorskie
 
         public async Task WriteToPlayers(string msgToAll, MessageType messageType = MessageType.Standard) 
             => await WriteToPlayers(CurrentPlayer, msgToAll, msgToAll, messageType);
-
-        public IEnumerable<IUserInterface> UniqueInferfaces => new HashSet<IUserInterface>(this.Select(p => p.UserInterface));
 
         public IEnumerator<Player> GetEnumerator()
         {

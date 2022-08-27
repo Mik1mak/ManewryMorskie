@@ -1,10 +1,10 @@
 {
-  "name": "ManewryMorskie.WebApp",
+  "name": "Manewry Morskie",
   "short_name": "Manewry Morskie",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#03173d",
+  "background_color": "#45A1BA",
+  "theme_color": "#212529",
   "prefer_related_applications": false,
   "icons": [
     {
