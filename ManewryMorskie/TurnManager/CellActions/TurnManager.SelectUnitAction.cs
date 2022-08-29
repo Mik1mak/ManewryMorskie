@@ -31,7 +31,16 @@ namespace ManewryMorskie.TurnManagerComponents
                 (MoveChecker? moveChecker, _)= parent.selectable[locationToSelect];
 
                 foreach (CellLocation moveableLocation in moveChecker!.Moveable())
+                {
+                    if (parent.map[locationToSelect].Unit!.IsAbleToSetMines
+                        && parent.playerManager.CurrentPlayer.Fleet.MinesAreAvaible)
+                    {
+                        AddAction(moveableLocation, new MoveAndSetMines(moveableLocation, moveChecker, parent));
+                        continue;
+                    }
+                                
                     AddAction(moveableLocation, new MoveAction(moveableLocation, moveChecker));
+                }
 
                 foreach (CellLocation minableLocation in moveChecker!.Minable().Except(parent.internationalWaterManager.InternationalWaters))
                     AddAction(minableLocation, new SetMineAction(minableLocation, parent));
@@ -54,7 +63,7 @@ namespace ManewryMorskie.TurnManagerComponents
 
                     AddAction(attackableOrDisarmableLcation, atkAction);
 
-                    if (parent.map[locationToSelect].Unit is Tralowiec)
+                    if (parent.map[locationToSelect].Unit!.IsAbleToDisarmMines)
                         AddAction(attackableOrDisarmableLcation, new DiasrmAction(atkAction));
                 }
 

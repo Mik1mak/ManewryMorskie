@@ -6,6 +6,8 @@ namespace ManewryMorskie
     public class Tralowiec : Unit
     {
         public override uint Step => 2;
+        public override bool IsAbleToSetMines => true;
+        public override bool IsAbleToDisarmMines => true;
 
         protected override IEnumerable<Type> StrongerUnits => _strongerUnits;
         private readonly static Type[] _strongerUnits = new[]

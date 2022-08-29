@@ -37,6 +37,16 @@ namespace ManewryMorskie
                 map[move.To].Unit = unit;
             }
 
+            foreach (CellLocation mineLocation in move.SetMines)
+            {
+                if (map[mineLocation].Unit is not null)
+                    continue;
+
+                Mina mine = new();
+                players.CurrentPlayer.Fleet.Set(mine);
+                map[mineLocation].Unit = mine;
+            }
+
             foreach (IUserInterface ui in players.UniqueInferfaces)
                 await ui.ExecuteMove(move);
 

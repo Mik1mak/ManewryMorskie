@@ -4,19 +4,14 @@
 <head>
     <meta charset="utf-8" />
     <title>Manewry Morskie - gra planszowa online</title>
-    <meta name="description" content="Manewry Morskie gra planszowa online"/>
-    <meta name="keywords" content="Manewry Morskie gra planszowa online Hot Seat"/>
+    <meta name="description" content="Manewry Morskie gra planszowa z czasów PRL online za darmo"/>
+    <meta name="keywords" content="Manewry Morskie, Okręty, Statki, PRL, gra, gra planszowa, gra dla młodzieży, online, Hot Seat, za darmo, free"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <base href="/" />
     <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
     <link href="css/app.css" rel="stylesheet" />
     <link href="ManewryMorskie.WebApp.styles.css" rel="stylesheet" />
     <link href="manifest.json" rel="manifest" />
-    <style type="text/css">
-        #app {
-            background-color: #3d97af;
-        }
-    </style>
 </head>
 
 <body class="vh-100">
@@ -24,7 +19,7 @@
         <div class="position-relative vh-100">
             <main class="position-absolute top-50 start-50 translate-middle justify-content-center text-center">
                 <img src="BlueShip.svg" title="icon" />
-                <h3 class="text-white" style="margin-top: -75px">Manewry Morskie</h3>
+                <h1 class="text-white">Manewry Morskie</h1>
                 <div class="spinner-border text-light" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
@@ -42,5 +37,6 @@
     <script src="lib/bootstrap/js/bootstrap.min.js"></script>
     <script src="_content/BlazorStrap/blazorstrap.js"></script>
     <script>navigator.serviceWorker.register('service-worker.js');</script>
+    <script src="onBeforeUnloadWarning.js"></script>
 </body>
 </html>

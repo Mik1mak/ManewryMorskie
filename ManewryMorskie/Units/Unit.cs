@@ -11,6 +11,10 @@ namespace ManewryMorskie
         public abstract uint Step { get; }
         public virtual uint AttackRange => Step;
 
+        public virtual bool IsSelectable => true;
+        public virtual bool IsAbleToSetMines => false;
+        public virtual bool IsAbleToDisarmMines => false;
+
         public BattleResult AttackedBy(Unit u)
         {
             Type attackingType = u.GetType();

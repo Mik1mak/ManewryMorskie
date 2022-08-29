@@ -50,6 +50,7 @@ namespace ManewryMorskie.TurnManagerComponents
 #endif
             selectable.Clear();
             result.Clear();
+            result.CurrentPlayerColor = playerManager.CurrentPlayer.Color;
             cancellationToken = token;
             
             foreach (CellLocation unitLocation in map.LocationsWithPlayersUnits(playerManager.CurrentPlayer))

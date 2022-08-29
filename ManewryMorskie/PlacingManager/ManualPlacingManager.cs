@@ -58,7 +58,7 @@ namespace ManewryMorskie.PlacingManagerComponents
             {
                 await Ui.DisplayMessage(msg, MessageType.SideMessage);
 
-                CellLocation selected = await selectionHandler.WaitForCorectSelection(selectable, token);
+                CellLocation selected = await selectionHandler.WaitForCorrectSelection(selectable, token);
                 await Ui.MarkCells(selected, MarkOptions.Selected);
                 await Ui.DisplayMessage("Wybierz jednostkę jaką chcesz umieścić", MessageType.SideMessage);
 

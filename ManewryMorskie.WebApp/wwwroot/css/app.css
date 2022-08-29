@@ -4,6 +4,15 @@ html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
+#app {
+    background-color: #3d97af;
+}
+
+main > h1 {
+    font-size: calc(1.3rem + .6vw);
+    margin-top: -75px;
+}
+
 h1:focus {
     outline: none;
 }

@@ -73,6 +73,13 @@ namespace ManewryMorskieRazor
 
                 await toCell.PlacePawn(pawn);
 
+                foreach (CellLocation minedLocation in mv.SetMines)
+                {
+                    await PlacePawn(minedLocation, pawn.Color, false, pawn.Color == mv.CurrentPlayerColor ? "mina" : string.Empty);
+                    await Task.Delay(200);
+                }
+                    
+
                 if (mv.Result != BattleResult.None)
                 {
                     await toCell.PlacePawn(pawn.Copy(mv.SourceUnitDescription!));

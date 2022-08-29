@@ -24,6 +24,7 @@
 
 .selected-color {
     background-color: rgba(108, 189, 81, 1);
+    cursor: pointer;
 }
 
 .moveable-color {
@@ -50,5 +51,5 @@
 }
 
 .mined-color {
-    background-color: rgba(255, 38, 241, 0.5);
+    background-color: rgba(255, 38, 241, 0.75);
 }

@@ -14,6 +14,7 @@ namespace ManewryMorskie
         public IReadOnlyList<Unit> DestroyedUnits => destroyedUnits;
 
         public int UsedMines { get; private set; } = 0;
+        public bool MinesAreAvaible => UsedMines < minesLimit;
 
         public static Dictionary<Type, int> UnitLimits { get; } = new()
         {
@@ -28,6 +29,7 @@ namespace ManewryMorskie
             { typeof(Pancernik), 3 },
             { typeof(Tralowiec), 4 },
         };
+        private static readonly int minesLimit = UnitLimits[typeof(Mina)];
 
         public int ActiveUnitsCount<T>() where T : Unit
         {

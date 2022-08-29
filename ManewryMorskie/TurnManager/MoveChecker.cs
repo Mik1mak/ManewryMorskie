@@ -70,10 +70,10 @@ namespace ManewryMorskie.TurnManagerComponents
 
         public IEnumerable<CellLocation> Minable()
         {
-            if (map[From].Unit == null || map[From].Unit is not Tralowiec)
+            if (map[From].Unit == null)
                 return Array.Empty<CellLocation>();
 
-            if (playerMgr.CurrentPlayer.Fleet.UsedMines >= Fleet.UnitLimits[typeof(Mina)])
+            if (!map[From].Unit!.IsAbleToSetMines || !playerMgr.CurrentPlayer.Fleet.MinesAreAvaible)
                 return Array.Empty<CellLocation>();
 
             if (map.AvaibleWaysFrom(From) == Ways.None)
@@ -98,7 +98,7 @@ namespace ManewryMorskie.TurnManagerComponents
             if (map[From].Unit == null)
                 return false;
 
-            if (map[From].Unit is Mina)
+            if (!map[From].Unit!.IsSelectable)
                 return false;
 
             if (map.AvaibleWaysFrom(From) == Ways.None)

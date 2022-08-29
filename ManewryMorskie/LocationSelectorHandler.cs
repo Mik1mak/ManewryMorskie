@@ -20,7 +20,7 @@ namespace ManewryMorskie
             this.ui = ui;
         }
 
-        public async Task<CellLocation> WaitForCorectSelection(IEnumerable<CellLocation> validSelection, CancellationToken token = default)
+        public async Task<CellLocation> WaitForCorrectSelection(IEnumerable<CellLocation> validSelection, CancellationToken token = default)
         {
             this.validSelection = validSelection;
             semaphore = new SemaphoreSlim(0, 1);

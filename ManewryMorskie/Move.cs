@@ -23,6 +23,7 @@ namespace ManewryMorskie
             To = mv.To;
             SourceUnitDescription = mv.SourceUnitDescription;
             TargetUnitDescription = mv.TargetUnitDescription;
+            CurrentPlayerColor = mv.CurrentPlayerColor;
             Disarm = mv.Disarm;
             Attack = mv.Attack;
             Result = mv.Result;
@@ -37,6 +38,8 @@ namespace ManewryMorskie
         public CellLocation To { get; set; }
         public string SourceUnitDescription { get; set; } = string.Empty;
         public string? TargetUnitDescription { get; set; }
+
+        public int CurrentPlayerColor { get; set; } = 0;
 
         public CellLocation? Disarm { get; set; }
         public CellLocation? Attack { get; set; }

@@ -9,15 +9,13 @@ namespace ManewryMorskie.TurnManagerComponents
 {
     public partial class TurnManager
     {
-        private class AttackAction : MoveAction, ICellAction, IDisposable
+        private class AttackAction : MoveAction, ICellAction
         {
-            private readonly SemaphoreSlim semaphore = new(0, 1);
             private readonly TurnManager parent;
             private readonly Unit attacker;
             private readonly Unit target;
 
             private CellLocation attackLocation;
-            private IEnumerable<CellLocation>? selectableEndLocations;
 
             public override string Name => "Atakuj";
             public override MarkOptions MarkMode => MarkOptions.Attackable;
@@ -40,39 +38,26 @@ namespace ManewryMorskie.TurnManagerComponents
                 move.Attack = attackLocation;
                 move.TargetUnitDescription = target.ToString();
 
-                selectableEndLocations = MoveChecker.Moveable()
+                IEnumerable<CellLocation> selectableEndLocations = MoveChecker.Moveable()
                     .Append(MoveChecker.From)
                     .Intersect(attackLocation.SquereRegion((int)attacker.AttackRange))
                     .Except(parent.internationalWaterManager.InternationalWaters);
 
                 IUserInterface ui = parent.playerManager.CurrentPlayer.UserInterface;
+                LocationSelectionHandler selectionHandler = new(ui);
                 await ui.MarkCells(parent.map.Keys, MarkOptions.None);
                 await ui.MarkCells(attackLocation, MarkOptions.Attacked);
                 await ui.DisplayMessage("Wybierz pozycję końcową", MessageType.SideMessage);
                 await ui.MarkCells(selectableEndLocations, MarkOptions.Moveable);
 
                 parent.ActionSelectionActive = false;
-                ui.ClickedLocation += Ui_ClickedLocation;
-                await semaphore.WaitAsync(token);
-                ui.ClickedLocation -= Ui_ClickedLocation;
+                Destination = await selectionHandler.WaitForCorrectSelection(selectableEndLocations, token);
                 parent.ActionSelectionActive = true;
-                await base.Execute(move, token);
 
-                return await Task.FromResult(true);
-            }
-
-            private void Ui_ClickedLocation(object sender, CellLocation e)
-            {
-                if (!selectableEndLocations.Contains(e))
-                    return;
-
-                base.Destination = e;
-                semaphore.Release();
-            }
-
-            public void Dispose()
-            {
-                parent.playerManager.CurrentPlayer.UserInterface.ClickedLocation -= Ui_ClickedLocation;
+                if(attacker.IsAbleToSetMines && parent.playerManager.CurrentPlayer.Fleet.MinesAreAvaible)
+                    return await new MoveAndSetMines(Destination, MoveChecker, parent).Execute(move, token);
+                else
+                    return await base.Execute(move, token);
             }
         }
     }
