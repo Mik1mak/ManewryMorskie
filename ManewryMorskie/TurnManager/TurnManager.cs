@@ -24,7 +24,7 @@ namespace ManewryMorskie.TurnManagerComponents
 
         private CellLocation? selectedUnitLocation;
         private CancellationToken? cancellationToken;
-        private bool turnFinished;
+        private bool turnFinished = false;
 
         private IUserInterface PlayerUi => playerManager.CurrentPlayer.UserInterface;
 
@@ -51,6 +51,7 @@ namespace ManewryMorskie.TurnManagerComponents
             result.Clear();
             result.CurrentPlayerColor = playerManager.CurrentPlayer.Color;
             cancellationToken = token;
+            turnFinished = false;
             
             foreach (CellLocation unitLocation in map.LocationsWithPlayersUnits(playerManager.CurrentPlayer))
                 selectable.Add(unitLocation, 
@@ -71,8 +72,12 @@ namespace ManewryMorskie.TurnManagerComponents
             await selectionHandler.Handle(
                 afterSelection: async (e, localToken) =>
                 {
-                    selectedUnitLocation = e;
                     var (moveChecker, actions) = selectable[e];
+
+                    if (actions.Count == 0)
+                        return;
+
+                    selectedUnitLocation = e;
 
                     if (actions.Count == 1)
                     {
