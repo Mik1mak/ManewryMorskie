@@ -50,9 +50,7 @@ namespace ManewryMorskie.TurnManagerComponents
                 await ui.DisplayMessage("Wybierz pozycję końcową", MessageType.SideMessage);
                 await ui.MarkCells(selectableEndLocations, MarkOptions.Moveable);
 
-                parent.ActionSelectionActive = false;
                 Destination = await selectionHandler.WaitForCorrectSelection(selectableEndLocations, token);
-                parent.ActionSelectionActive = true;
 
                 if(attacker.IsAbleToSetMines && parent.playerManager.CurrentPlayer.Fleet.MinesAreAvaible)
                     return await new MoveAndSetMines(Destination, MoveChecker, parent).Execute(move, token);

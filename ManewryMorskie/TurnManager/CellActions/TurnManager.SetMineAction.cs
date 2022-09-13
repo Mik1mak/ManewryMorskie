@@ -9,7 +9,7 @@ namespace ManewryMorskie.TurnManagerComponents
 {
     public partial class TurnManager
     {
-        private class SetMineAction : ICellAction
+        private class SetMineAction : MineActionBase, ICellAction
         {
             public string Name => "Ustaw minę";
             public MarkOptions MarkMode => MarkOptions.Minable;
@@ -18,7 +18,7 @@ namespace ManewryMorskie.TurnManagerComponents
             private readonly TurnManager parent;
 
 
-            public SetMineAction(CellLocation setMineLocation, TurnManager parent)
+            public SetMineAction(CellLocation setMineLocation, TurnManager parent) : base(parent)
             {
                 this.setMineLocation = setMineLocation;
                 this.parent = parent;
@@ -34,26 +34,7 @@ namespace ManewryMorskie.TurnManagerComponents
                 currentPlayer.Fleet.Set(mine);
                 parent.map[setMineLocation].Unit = mine;
 
-                foreach (IUserInterface ui in parent.playerManager.UniqueInferfaces)
-                    await ui.PlacePawn(setMineLocation, currentPlayer.Color, false, mine.ToString());
-
-                foreach ((MoveChecker? moveChecker, IList<ICellAction> actions) 
-                    in parent.selectable.Keys
-                        .Intersect(setMineLocation.SquereRegion(4))
-                        .Select(k => parent.selectable[k]))
-                {
-                    actions.Clear();
-
-                    if(moveChecker?.UnitIsSelectable() ?? false)
-                    {
-                        moveChecker.UpdatePaths();
-
-                        if(moveChecker.UnitIsSelectable())
-                            actions.Add(new SelectUnitAction(moveChecker.From, parent));
-                    }
-                }
-
-                parent.selectedUnitLocation = null;
+                RefreshActions(setMineLocation);
 
                 return await Task.FromResult(false);
             }

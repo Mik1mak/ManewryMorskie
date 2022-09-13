@@ -12,6 +12,7 @@ namespace ManewryMorskie
         private readonly PlayerManager players;
 
         public Move? LastExecuted { get; private set; }
+        public Move? PreviousLastExecuted { get; private set; }
 
         public MoveExecutor(StandardMap map, PlayerManager players)
         {
@@ -50,6 +51,7 @@ namespace ManewryMorskie
             foreach (IUserInterface ui in players.UniqueInferfaces)
                 await ui.ExecuteMove(move);
 
+            PreviousLastExecuted = LastExecuted;
             LastExecuted = new(move);
         }
 

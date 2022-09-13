@@ -294,16 +294,32 @@ namespace ManewryTests
         }
 
         [Test]
-        public void CellLocationExtensionsPerformance()
+        public void AlgebraicNotationTest()
         {
-            Stopwatch watch = new();
+            INotation an = new AlgebraicNotation();
 
-            watch.Start();
-            for (int i = 0; i < 200; i++)
-                _ = new CellLocation(0,0).SquereRegion(i);
-            watch.Stop();
+            string location = an.GetNotation((3, 5));
+            CellLocation redLocation = an.GetLocation(location);
 
-            Console.WriteLine($"SquereRegion operation {watch.ElapsedMilliseconds}ms");
+            Assert.IsTrue(redLocation.Equals((3, 5)));
         }
+
+        [Test]
+        public void LineBetweenTest()
+        {
+            List<(IList<CellLocation> sequence, List<CellLocation> expected)> tests = new()
+            {
+                (new CellLocation(3, 3).LineBetween((3, 6)), new(){(3, 4), (3, 5)}),
+                (new CellLocation(0, 0).LineBetween((3, 3)), new(){(1, 1), (2, 2)}),
+                (new CellLocation(3, 3).LineBetween((6, 3)), new(){(4, 3), (5, 3)}),
+                (new CellLocation(0, 0).LineBetween((6, 3)), new(){(1,0), (2,1), (3,2), (4,2), (5,2)}),
+            };
+
+            foreach (var (sequence, expected) in tests)
+                if (!expected.SequenceEqual(sequence))
+                    Assert.Fail();
+
+            Assert.Pass();
+        } 
     }
 }

@@ -13,10 +13,10 @@ namespace ManewryMorskie.PlacingManagerComponents
         private readonly List<CellLocation> topBatteriesPlaces = new() { (1, 16), (1, 15), (3, 16), (8, 14), (10, 14) };
         private readonly List<CellLocation> bottomBatteriesPlaces = new() { (1, 3), (3, 3), (8, 1), (10, 1), (10, 2) };
 
-        private readonly Dictionary<Type, string> unitsLabels = new();
-        private readonly Player currentPlayer;
+        protected readonly Dictionary<Type, string> unitsLabels = new();
+        protected readonly Player currentPlayer;
 
-        private IUserInterface Ui => currentPlayer.UserInterface;
+        protected IUserInterface Ui => currentPlayer.UserInterface;
 
         public ManualPlacingManager(Dictionary<Type, int> unitsToPlace, RectangleCellMap<MapField> map,
             PlayerManager players, Player currentPlayer)
@@ -46,7 +46,7 @@ namespace ManewryMorskie.PlacingManagerComponents
             await currentPlayer.UserInterface.DisplayMessage("Zaczekaj aż przeciwnik ustawi pionki", MessageType.SideMessage);
         }
 
-        private async Task Place(List<CellLocation> selectable, Func<KeyValuePair<Type, int>, bool> selector,
+        protected virtual async Task Place(List<CellLocation> selectable, Func<KeyValuePair<Type, int>, bool> selector,
             string msg, CancellationToken token)
         {
             LocationSelectionHandler selectionHandler = new(Ui);

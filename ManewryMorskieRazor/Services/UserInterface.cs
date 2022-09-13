@@ -35,11 +35,10 @@ namespace ManewryMorskieRazor
         {
             if(ActiveClickInput)
                 ClickedLocation?.Invoke(this, location);
-        } 
+        }
 
         public async Task DisplayContextOptionsMenu(CellLocation location, params string[] options)
         {
-            ActiveClickInput = false;
             await boardService[location].DisplayContextMenu(options);
         }
 

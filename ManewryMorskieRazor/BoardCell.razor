@@ -113,7 +113,8 @@
 
     private void CellClicked()
     {
-        Ui.Click(Location);
+        if (!options.Any())
+            Ui.Click(Location);
     }
 
     private async Task MarkCell(MarkOptions option)

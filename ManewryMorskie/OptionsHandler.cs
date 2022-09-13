@@ -19,12 +19,9 @@ namespace ManewryMorskie
             this.ui = ui;
         }
 
-        public async Task<T?> ChooseOption<T>(IEnumerable<KeyValuePair<string, T>> options, string title = "",
+        public async Task<T> ChooseOption<T>(IEnumerable<KeyValuePair<string, T>> options, string title = "",
             CellLocation? context = null, CancellationToken token = default) where T : class
         {
-            if (token.IsCancellationRequested)
-                return null;
-
             semaphore = new SemaphoreSlim(0, 1);
             ui.ChoosenOptionId += Ui_ChoosenOptionId;
 
@@ -37,9 +34,9 @@ namespace ManewryMorskie
             {
                 await semaphore.WaitAsync(token);
             }
-            catch(OperationCanceledException)
+            catch(OperationCanceledException e)
             {
-                return null;
+                throw e;
             }
             finally
             {

@@ -44,7 +44,6 @@ namespace ManewryMorskie.TurnManagerComponents
                 await current.MarkCells(Destination, MarkOptions.Selected);
                 selectable.Add(Destination);
 
-                parent.ActionSelectionActive = false;
 
                 int placedMines = 0;
                 while(true)
@@ -53,21 +52,28 @@ namespace ManewryMorskie.TurnManagerComponents
 
                     if(selected != Destination)
                     {
-                        move.SetMines.Add(selected);
+                        if(move.SetMines.Contains(selected))
+                        {
+                            placedMines--;
+                            move.SetMines.Remove(selected);
+                            await current.MarkCells(selected, MarkOptions.None);
+                            await current.MarkCells(selected, MarkOptions.Minable);
+                        }
+                        else
+                        {
+                            placedMines++;
+                            move.SetMines.Add(selected);
+                            await current.MarkCells(selected, MarkOptions.Mined);
+                        }
 
-                        if (parent.playerManager.CurrentPlayer.Fleet.UsedMines + ++placedMines == Fleet.UnitLimits[typeof(Mina)])
+                        if (parent.playerManager.CurrentPlayer.Fleet.UsedMines + placedMines == Fleet.UnitLimits[typeof(Mina)])
                             break;
-
-                        await current.MarkCells(selected, MarkOptions.Mined);
-                        selectable.Remove(selected);
                     }
                     else
                     {
                         break;
                     }
                 }
-
-                parent.ActionSelectionActive = true;
 
                 return await base.Execute(move, token);
             }

@@ -30,6 +30,10 @@ namespace ManewryMorskie
             {
                 await semaphore.WaitAsync(token);
             }
+            catch(OperationCanceledException e)
+            {
+                throw e;
+            }
             finally
             {
                 ui.ClickedLocation -= Ui_ClickedLocation;

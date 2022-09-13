@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Linq;
+using ManewryMorskie.PlacingManager;
 
 namespace ManewryMorskie.PlacingManagerComponents
 {
@@ -25,6 +26,7 @@ namespace ManewryMorskie.PlacingManagerComponents
             placingMangers = new Dictionary<string, IPlacingManager>()
             {
                 ["Ręczne ustawienie pionków"] = new ManualPlacingManager(unitsToPlace, map, players, currentPlayer),
+                ["Ręczne ustawianie pionków z cofaniem"] = new ManualUnselectablePlacingManager(unitsToPlace, map, players, currentPlayer),
                 ["Automatyczne ustawienie pionków"] = new AutoPlacingManager(unitsToPlace, map, players, currentPlayer),
             };
         }
@@ -39,7 +41,11 @@ namespace ManewryMorskie.PlacingManagerComponents
                 await choosenManager.PlacePawns(token);
         }
 
-        public void Dispose() { }
+        public void Dispose() 
+        {
+            foreach (IPlacingManager placingManager in placingMangers.Values)
+                placingManager.Dispose();
+        }
     }
 
 }

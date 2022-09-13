@@ -68,8 +68,11 @@ namespace ManewryMorskie
                         .UserInterface.PlacePawn(last.To, current.Color, map[last.To].Unit is Bateria);
             }
 
-            foreach (CellLocation mineLocation in last.SetMines)
-                await enemy.UserInterface.PlacePawn(mineLocation, current.Color, false);
+            if (executor.PreviousLastExecuted == null)
+                return;
+
+            foreach (CellLocation mineLocation in executor.PreviousLastExecuted.SetMines)
+                await current.UserInterface.PlacePawn(mineLocation, enemy.Color, false);
         }
 
         private bool LocationIsExcluded(CellLocation l)

@@ -69,8 +69,16 @@ namespace ManewryMorskie
 
             units.Add(unit);
 
-            if (unitType == typeof(Mina))
+            if (unit is Mina)
                 UsedMines++;
+        }
+
+        public void UndoSet(Unit unit)
+        {
+            units.Remove(unit);
+
+            if (unit is Mina)
+                UsedMines--;
         }
 
         private int UnitsCount(Type type)

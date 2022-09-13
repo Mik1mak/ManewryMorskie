@@ -18,19 +18,18 @@ namespace ManewryMorskie.TurnManagerComponents
         private readonly PlayerManager playerManager;
         private readonly InternationalWaterManager internationalWaterManager;
         private readonly ILogger? logger;
-        private readonly SemaphoreSlim semaphore = new(0, 1);
         private readonly Selectable selectable = new();
         private readonly CellMarker marker;
         private readonly Move result = new();
 
         private CellLocation? selectedUnitLocation;
         private CancellationToken? cancellationToken;
-
-        public bool ActionSelectionActive { get; set; } = true;
+        private bool turnFinished;
 
         private IUserInterface PlayerUi => playerManager.CurrentPlayer.UserInterface;
 
-        public TurnManager(StandardMap map, PlayerManager playerManager, InternationalWaterManager internationalWaterManager, ILogger? logger = null)
+        public TurnManager(StandardMap map, PlayerManager playerManager,
+            InternationalWaterManager internationalWaterManager, ILogger? logger = null)
         {
             this.map = map;
             this.playerManager = playerManager;
@@ -68,14 +67,42 @@ namespace ManewryMorskie.TurnManagerComponents
             await PlayerUi.DisplayMessage("Wybierz jednostkę", MessageType.SideMessage);
             await marker.UpdateMarks();
 
-            ActionSelectionActive = true;
-            PlayerUi.ClickedLocation += SelectedLocation;
+            using CancellableLocationSelectionHandler selectionHandler = new(PlayerUi, selectable.Keys);
+            await selectionHandler.Handle(
+                afterSelection: async (e, localToken) =>
+                {
+                    selectedUnitLocation = e;
+                    var (moveChecker, actions) = selectable[e];
+
+                    if (actions.Count == 1)
+                    {
+                        await RealiseAction(actions.First());
+                    }
+                    else if (actions.Count > 1)
+                    {
+                        try
+                        {
+                            OptionsHandler optionsHandler = new(PlayerUi);
+                            ICellAction result = await optionsHandler.ChooseOption(
+                                options: actions.Select(a => new KeyValuePair<string, ICellAction>(a.Name, a)),
+                                context: selectedUnitLocation,
+                                token: localToken);
+
+                            await RealiseAction(result);
+                        }
+                        catch(OperationCanceledException)
+                        {
+                            await PlayerUi.DisplayContextOptionsMenu(selectedUnitLocation.Value, Array.Empty<string>());
+                        }
+                    }
+                },
+                until: () => !turnFinished,
+                token: token);
+
 #if DEBUG
             makeMoveWatch.Stop();
             logger?.LogInformation("MakeMove waiting for release {ms}ms", makeMoveWatch.ElapsedMilliseconds);
 #endif
-            await semaphore.WaitAsync(token);
-            token.ThrowIfCancellationRequested();
 
             marker.LastMove = new(result);
             await marker.ClearAndMarkLastMove(playerManager.UniqueInferfaces);
@@ -84,41 +111,7 @@ namespace ManewryMorskie.TurnManagerComponents
             return result;
         }
 
-        private async void SelectedLocation(object sender, CellLocation e)
-        {
-            if (!ActionSelectionActive)
-                return;
-
-            if (selectable.TryGetValue(e, out var value))
-            {
-                //ActionSelectionActive = false;
-                selectedUnitLocation = e;
-
-                if (value.actions.Count == 1)
-                {
-                    await RealiseAction(value.actions.First());
-                }
-                else if (value.actions.Count > 1)
-                {
-                    //wyświetl listę i pozwól wybrać
-                    await PlayerUi.DisplayContextOptionsMenu(e, value.actions.Select(o => o.Name).ToArray());
-
-                    PlayerUi.ChoosenOptionId -= ChooseOption;
-                    PlayerUi.ChoosenOptionId += ChooseOption;
-                }
-            }
-        }
-
-        private async void ChooseOption(object sender, int e)
-        {
-            if (selectable[selectedUnitLocation!.Value].actions.Count <= e)
-                return;
-
-            PlayerUi.ChoosenOptionId -= ChooseOption;
-            
-            await RealiseAction(selectable[selectedUnitLocation!.Value].actions[e]);
-        }
-
+        
         private async ValueTask RealiseAction(ICellAction action)
         {
 #if DEBUG
@@ -126,20 +119,16 @@ namespace ManewryMorskie.TurnManagerComponents
             watch.Start();
             logger?.LogInformation("Realising Action Started.");
 #endif
-            ActionSelectionActive = true;
-            bool finishTurn = await action.Execute(result!, cancellationToken!.Value);
+            turnFinished = await action.Execute(result!, cancellationToken!.Value);
 #if DEBUG
             watch.Stop();
             logger?.LogInformation("Realised Action \"{actionName}\" in {time}ms", action.Name, watch.ElapsedMilliseconds);
 #endif
 
-            if (finishTurn)
+            if (turnFinished)
             {
-                PlayerUi.ClickedLocation -= SelectedLocation;
-                PlayerUi.ChoosenOptionId -= ChooseOption;
                 selectedUnitLocation = null;
                 result!.SourceUnitDescription = map[result.From].Unit!.ToString();
-                semaphore.Release();
             }
             else
             {
@@ -147,10 +136,6 @@ namespace ManewryMorskie.TurnManagerComponents
             }
         }
 
-        public void Dispose()
-        {
-            PlayerUi.ChoosenOptionId -= ChooseOption;
-            PlayerUi.ClickedLocation -= SelectedLocation;
-        }
+        public void Dispose(){}
     }
 }

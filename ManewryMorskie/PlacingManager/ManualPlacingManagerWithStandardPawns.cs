@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Threading;
 using Microsoft.Extensions.Logging;
+using ManewryMorskie.PlacingManager;
 
 namespace ManewryMorskie.PlacingManagerComponents
 {
@@ -18,7 +19,7 @@ namespace ManewryMorskie.PlacingManagerComponents
             {
                 [typeof(Mina)] = 0
             };
-            placingManager = new ManualPlacingManager(unitsToPlace, map, players, currentPlayer);
+            placingManager = new ManualUnselectablePlacingManager(unitsToPlace, map, players, currentPlayer);
         }
 
         public async Task PlacePawns(CancellationToken token)

@@ -45,6 +45,9 @@ namespace ManewryMorskie.TurnManagerComponents
                 foreach (CellLocation minableLocation in moveChecker!.Minable().Except(parent.internationalWaterManager.InternationalWaters))
                     AddAction(minableLocation, new SetMineAction(minableLocation, parent));
 
+                foreach (CellLocation minedLocation in parent.result.SetMines)
+                    AddAction(minedLocation, new UndoSetMineAction(minedLocation, parent));
+
                 foreach (CellLocation attackableOrDisarmableLcation in moveChecker!.AttackableOrDisarmable())
                 {
                     if (parent.internationalWaterManager.InternationalWaters.Contains(attackableOrDisarmableLcation))

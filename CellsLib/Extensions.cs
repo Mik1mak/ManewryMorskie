@@ -70,34 +70,47 @@ namespace CellLib
         public static IList<CellLocation> NextLocations(this (int, int) start, Ways ways, int length = 1) 
             => NextLocations((CellLocation)start, ways, length);
 
-        public static IList<CellLocation> SquereRegion(this CellLocation from, int radius)
+        public static Region SquereRegion(this CellLocation from, int radius)
         {
             CellLocation fromRegion = from + (Ways.TopLeft, radius);
             CellLocation toRegion = from + (Ways.BottomRight, radius);
 
-            return fromRegion.Region(toRegion);
+            return new(fromRegion, toRegion);
         }
+        public static Region Region(this (int, int) from, CellLocation to) => new(from, to);
 
-        public static IList<CellLocation> Region(this CellLocation from, CellLocation to)
+        public static Region Region(this CellLocation from, CellLocation to) => new(from, to);
+
+        public static IList<CellLocation> LineBetween(this CellLocation from, CellLocation to)
         {
-            List<CellLocation> list = new();
+            var output = new List<CellLocation>();
+            int min, max;
 
-            CellLocation fixedFrom = (Math.Min(from.Column, to.Column), Math.Min(from.Row, to.Row));
-            CellLocation fixedTo = (Math.Max(from.Column, to.Column), Math.Max(from.Row, to.Row));
+            if (from.Column == to.Column)
+            {
+                if (from.Row > to.Row)
+                    (min, max) = (to.Row, from.Row);
+                else
+                    (min, max) = (from.Row, to.Row);
 
-            for (int col = fixedFrom.Column; col <= fixedTo.Column; col++)
-                for (int row = fixedFrom.Row; row <= fixedTo.Row; row++)
-                    list.Add((col, row));
+                for (int i = (min + 1); i < max; i++)
+                    output.Add(new CellLocation(from.Column, i));
+            }
+            else
+            {
+                if (from.Column > to.Column)
+                    (min, max) = (to.Column, from.Column);
+                else
+                    (min, max) = (from.Column, to.Column);
 
-            return list;
-        }
-        public static IList<CellLocation> Region(this (int, int) from, CellLocation to) 
-            => Region((CellLocation)from, to);
+                double a = (from.Row - to.Row) / (double)(from.Column - to.Column);
+                double b = from.Row - (a * from.Column);
 
-        public static IEnumerable<CellLocation> TrimToMapSize<T>(this IEnumerable<CellLocation> region, RectangleCellMap<T> map) 
-            where T : class, new() 
-        {
-            return region.Where(location => map.LocationIsOnTheMap(location));
+                for (int x = (min + 1); x < max; x++)
+                    output.Add(new CellLocation(x, (int)Math.Round(a * x + b)));
+            }
+
+            return output;
         }
     }
 }

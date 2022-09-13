@@ -4,7 +4,7 @@ using System.Text;
 
 namespace CellLib
 {
-    public class RectangleCellMap<T> : IEnumerable<T> where T : class, new()
+    public class RectangleCellMap<T> : IReadOnlyDictionary<CellLocation, T>, IRectangle, IEnumerable<T> where T : class, new()
     {
         protected T[][] fields;
 
@@ -72,5 +72,27 @@ namespace CellLib
 
         public IEnumerator<T> GetEnumerator() => new CellsEnumerator<T>(fields);
         IEnumerator IEnumerable.GetEnumerator() => new CellsEnumerator<T>(fields);
+
+        #region IReadonlyDictionary
+        public IEnumerable<T> Values => this;
+        public bool ContainsKey(CellLocation key) => LocationIsOnTheMap(key);
+
+        public bool TryGetValue(CellLocation key, out T value)
+        {
+            if (ContainsKey(key))
+            {
+                value = this[key];
+                return true;
+            }
+            value = default;
+            return false;
+        }
+
+        IEnumerator<KeyValuePair<CellLocation, T>> IEnumerable<KeyValuePair<CellLocation, T>>.GetEnumerator()
+        {
+            foreach (CellLocation key in Keys)
+                yield return new KeyValuePair<CellLocation, T>(key, this[key]);
+        }
+        #endregion
     }
 }
