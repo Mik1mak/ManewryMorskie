@@ -149,6 +149,11 @@ namespace ManewryMorskie.Network
             await Connection_Closed(null);
         }
 
+        public async Task<Dictionary<string, int[]>> GetDestroyedUnitsTable()
+        {
+            return (await connection.InvokeAsync<Dictionary<string, int[]>?>(nameof(GetDestroyedUnitsTable))) ?? new();
+        }
+
         public async ValueTask DisposeAsync()
         {
             await StopAsync();

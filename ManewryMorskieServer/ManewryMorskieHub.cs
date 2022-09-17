@@ -18,20 +18,47 @@ namespace ManewryMorskie.Server
             this.logger = logger;
         }
 
+        public Task<Dictionary<string, int[]>?> GetDestroyedUnitsTable()
+        {
+            if(Context.Items.TryGetValue(nameof(Room), out object? roomObj))
+            {
+                Room room = (Room)roomObj!;
+
+                Dictionary<string, int[]> result = new();
+
+                foreach (Player player in room.Clients)
+                {
+                    foreach (Unit destroyedUnit in player.Fleet.DestroyedUnits)
+                    {
+                        string key = destroyedUnit.ToString()!;
+
+                        if (!result.ContainsKey(key))
+                            result.Add(key, new int[] { 0, 0 });
+
+                        result[key][player.Color]++;
+                    }
+                }
+
+                return Task.FromResult<Dictionary<string, int[]>?>(result);
+            }
+
+            return Task.FromResult<Dictionary<string, int[]>?>(null);
+        }
+
         public async Task CreateRoom(string? name)
         {
             if (name == null)
-                await rooms.CreateRandomRoom(Groups, Client);
+                await rooms.CreateRandomRoom(Groups, Client, Context.Items);
             else
-                await rooms.CreateRoom(name, Groups, Client);
+                await rooms.CreateRoom(name, Groups, Client, Context.Items);
         }
 
         public async Task JoinToRoom(string? name)
         {
             if (name == null)
-                await rooms.JoinToRandomRoom(Groups, Client);
+                await rooms.JoinToRandomRoom(Groups, Client, Context.Items);
             else
-                await rooms.JoinToRoom(name, Groups, Client);
+                await rooms.JoinToRoom(name, Groups, Client, Context.Items);
         }
    
         public Task ChoosenOptionId(int optionId)

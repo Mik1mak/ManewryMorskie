@@ -1,0 +1,42 @@
+﻿@if (Source != null)
+{
+    @if (Source.Count == 0)
+    {
+        <div class="alert alert-light" role="alert">
+            Brak zniszczonych jednostek w obecnej rozgrywce.
+        </div>
+    }
+    else
+    {
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th>Jednostka</th>
+                    <th>
+                        <img class="ship-icon" src="_content/ManewryMorskieRazor/PawnYellowShip.svg" title="Żółty" />
+                    </th>
+                    <th>
+                        <img class="ship-icon" src="_content/ManewryMorskieRazor/PawnBlueShip.svg" title="Niebieski" />
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (KeyValuePair<string, int[]> item in Source)
+                {
+                    <tr>
+                        <td>@item.Key</td>
+                        @for (int i = 0; i < item.Value.Length; i++)
+                        {
+                            <td>@item.Value[i]</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+
+@code {
+    [Parameter]
+    public Dictionary<string, int[]>? Source { get; set; }
+}

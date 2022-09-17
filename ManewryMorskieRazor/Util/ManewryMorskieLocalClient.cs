@@ -6,10 +6,13 @@ namespace ManewryMorskieRazor
 {
     public class ManewryMorskieLocalClient : IManewryMorskieClient
     {
-        private ManewryMorskieGame game;
-        private IUserInterface ui;
+        private readonly IUserInterface ui;
+        private readonly ManewryMorskieGame game;
+        private readonly Player playerOne;
+        private readonly Player playerTwo;
 
         public event Func<string?, Task>? GameClosed;
+        public event Func<Task>? GameStarted;
 
         public event EventHandler<int> TurnChanged
         {
@@ -21,12 +24,12 @@ namespace ManewryMorskieRazor
         {
             this.ui = ui;
 
-            Player playerOne = new(ui)
+            playerOne = new(ui)
             {
                 Color = 1,
             };
 
-            Player playerTwo = new(ui)
+            playerTwo = new(ui)
             {
                 Color = 0,
             };
@@ -38,12 +41,34 @@ namespace ManewryMorskieRazor
         {
             try
             {
+                if(GameStarted != null)
+                    await GameStarted.Invoke();
                 await game.Start(ct);
             }
             finally
             {
                 GameClosed?.Invoke(string.Empty);
             }
+        }
+
+        public Task<Dictionary<string, int[]>> GetDestroyedUnitsTable()
+        {
+            Dictionary<string, int[]> result = new();
+
+            foreach (Player player in new[] { playerOne, playerTwo })
+            {
+                foreach (Unit destroyedUnit in player.Fleet.DestroyedUnits)
+                {
+                    string key = destroyedUnit.ToString()!;
+
+                    if (!result.ContainsKey(key))
+                        result.Add(key, new int[] { 0, 0 });
+
+                    result[key][player.Color]++;
+                }
+            }
+
+            return Task.FromResult(result);
         }
 
         public async ValueTask DisposeAsync()

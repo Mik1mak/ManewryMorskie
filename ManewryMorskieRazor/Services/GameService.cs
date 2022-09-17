@@ -1,10 +1,5 @@
 ﻿using ManewryMorskie.Network;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -21,12 +16,22 @@ namespace ManewryMorskieRazor
         private CancellationTokenSource? tokenSource;
         private IManewryMorskieClient? client;
 
+        public event Func<Task>? GameStarted;
+        public event Func<string?, Task>? GameClosed;
+
         public GameService(UserInterface ui, DialogService dialogService, IConfiguration Configuration, ILogger<GameService> logger)
         {
             this.ui = ui;
             this.dialogService = dialogService;
             this.logger = logger;
             serverUrl = Configuration["ManewryMorskieServerUrl"];
+        }
+
+        public async Task<Dictionary<string, int[]>> DestroyedUnits()
+        {
+            if (client == null)
+                return new();
+            return await client.GetDestroyedUnitsTable();
         }
 
         public async ValueTask SetUpLocal()
@@ -71,6 +76,8 @@ namespace ManewryMorskieRazor
             if (client != null)
             {
                 client.GameClosed -= Client_GameClosed;
+                client.GameClosed -= GameClosed;
+                client.GameStarted -= GameStarted;
                 await client.DisposeAsync();
             }
 
@@ -82,6 +89,8 @@ namespace ManewryMorskieRazor
             if (client != null)
             {
                 client.GameClosed += Client_GameClosed;
+                client.GameClosed += GameClosed;
+                client.GameStarted += GameStarted;
 
                 tokenSource?.Cancel();
                 await Task.Delay(5);

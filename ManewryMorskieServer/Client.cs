@@ -9,6 +9,7 @@ namespace ManewryMorskie.Server
         public event Func<Task>? Disconnecting;
         public bool IsDisconnected { get; private set; }
 
+        private IClientProxy ClientProxy => hubContext.Clients.Client(Id);
         public string Id { get; private set; } = string.Empty;
         public CancellationToken CancellationToken { get; private set; }
         public NetworkUserInterface NetworkUserInterface => (NetworkUserInterface)this.UserInterface;
@@ -30,13 +31,13 @@ namespace ManewryMorskie.Server
             if(message != null)
                 await UserInterface.DisplayMessage(message);
 
-            await hubContext.Clients.Client(Id).SendAsync("Kick");
+            await ClientProxy.SendAsync("Kick");
             IsDisconnected = true;
         }
 
         public async Task GameStarted()
         {
-            await hubContext.Clients.Client(Id).SendAsync(nameof(GameStarted));
+            await ClientProxy.SendAsync(nameof(GameStarted));
         }
 
         public async Task Disconnect()

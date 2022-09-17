@@ -50,17 +50,14 @@ namespace ManewryMorskie
 
         private void Ui_ClickedLocation(object sender, CellLocation e)
         {
-            if(validLocations.Contains(e))
+            if(selected.HasValue)
             {
-                if(selected.HasValue)
-                {
-                    tokenSource!.Cancel();
-                }
-                else
-                {
-                    selected = e;
-                    semaphore!.Release();
-                }
+                tokenSource?.Cancel();
+            }
+            else if(validLocations.Contains(e))
+            {
+                selected = e;
+                semaphore!.Release();
             }
         }
 

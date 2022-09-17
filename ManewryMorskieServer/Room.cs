@@ -1,4 +1,6 @@
-﻿namespace ManewryMorskie.Server
+﻿using Microsoft.AspNetCore.SignalR;
+
+namespace ManewryMorskie.Server
 {
     public class Room
     {
@@ -18,13 +20,15 @@
             this.logger = logger;
         }
 
-        public Room AddClient(Client client)
+        public Room AddClient(Client client, IDictionary<object, object?> contextItems)
         {
             if (!IsWaitingForPlayers)
                 throw new InvalidOperationException("Too many clients in Room!");
 
             clients.Add(client);
             client.Disconnecting += Client_Disconnecting;
+
+            contextItems.Add(nameof(Room), this);
             return this;
         }
 

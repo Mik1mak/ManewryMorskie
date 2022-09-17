@@ -1,4 +1,5 @@
-﻿@inject GameService Game
+﻿@implements IDisposable
+@inject GameService Game
 
 <MyBSModal Id="instruction-modal" Header="Zasady gry">
     <Content>
@@ -8,6 +9,11 @@
 <MyBSModal Id="table-modal" Header="Jednostki">
     <Content>
         <UnitsPowerTable/>
+    </Content>
+</MyBSModal>
+<MyBSModal Id="destroyed-units-modal" Header="Zniszczone Jednostki">
+    <Content>
+        <DestroyedUnits Source="destroyedUnits"/>
     </Content>
 </MyBSModal>
 <OnlineGameModal />
@@ -37,13 +43,18 @@
                     <BSDropdown IsDiv="true" Class="dropdown-menu-dark">
                         <Toggler>
                             <BSToggle IsButton="true" IsOutlined="true" Color="BSColor.Light" MarginLeftAndRight="Margins.Small">
-                                <span class="oi oi-question-mark"></span>
-                                <span class="d-none d-md-inline">  Zasady</span>
+                                <span class="oi oi-info"></span>
+                                <span class="d-none d-md-inline">  Rozgrywka</span>
                             </BSToggle>
                         </Toggler>
                         <Content>
                             <BSDropdownItem Attributes='ToggleAtributes("#instruction-modal")'>Zasady gry</BSDropdownItem>
                             <BSDropdownItem Attributes='ToggleAtributes("#table-modal")'>Tabela jednostek</BSDropdownItem>
+                            <BSDropdownItem IsDisabled="!isGameOngoing"
+                                @onclick="async () => destroyedUnits = await Game.DestroyedUnits()"
+                                Attributes='ToggleAtributes("#destroyed-units-modal")'>
+                                Zniszczone jednostki
+                            </BSDropdownItem>
                         </Content>
                     </BSDropdown>
                 </BSButtonGroup>
@@ -55,6 +66,15 @@
 
 @code 
 {
+    private bool isGameOngoing = false;
+    private Dictionary<string, int[]>? destroyedUnits;
+
+    protected override void OnInitialized()
+    {
+        Game.GameStarted += GameStarted;
+        Game.GameClosed += GameStopped;
+    }
+
     private Dictionary<string, object> ToggleAtributes(string dataBsTargetValue)
     {
         return new() { { "data-bs-toggle", "modal" }, { "data-bs-target", dataBsTargetValue } };
@@ -64,5 +84,17 @@
     {
         await Game.SetUpLocal();
         await Game.RunGame();
+    }
+
+    private async Task GameStarted() => await SetOngoing(true);
+
+    private async Task GameStopped(string? msg) => await SetOngoing(false);
+
+    private async ValueTask SetOngoing(bool val) => await InvokeAsync(() => { isGameOngoing = val; StateHasChanged(); });
+
+    public void Dispose()
+    {
+        Game.GameStarted -= GameStarted;
+        Game.GameClosed -= GameStopped;
     }
 }

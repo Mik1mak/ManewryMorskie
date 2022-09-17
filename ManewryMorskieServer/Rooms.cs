@@ -17,25 +17,26 @@ namespace ManewryMorskie.Server
             this.logger = logger;
         }
 
-        public async Task CreateRandomRoom(IGroupManager groups, Client creator)
+        public async Task CreateRandomRoom(IGroupManager groups, Client creator, IDictionary<object, object?> contextItems)
         {
-            await CreateRoom(groups, creator, Guid.NewGuid().ToString(), randomRooms);
+            await CreateRoom(groups, creator, Guid.NewGuid().ToString(), contextItems, randomRooms);
         }
 
-        public async Task CreateRoom(string name, IGroupManager groups, Client creator)
+        public async Task CreateRoom(string name, IGroupManager groups, Client creator, IDictionary<object, object?> contextItems)
         {
             if(namedRooms.ContainsKey(name))
                 await creator.Kick("Pokój o podanej nazwie już istnieje. Proszę podać inną nazwę.");
             else
-                await CreateRoom(groups, creator, name, namedRooms);
+                await CreateRoom(groups, creator, name, contextItems, namedRooms);
         }
 
-        private async Task CreateRoom(IGroupManager groups, Client creator, string name, IDictionary<string, Room> rooms)
+        private async Task CreateRoom(IGroupManager groups, Client creator, string name, 
+            IDictionary<object, object?> contextItems, IDictionary<string, Room> rooms)
         {
             if (RoomsCount < roomsLimits)
             {
                 await groups.AddToGroupAsync(creator.Id, name);
-                rooms.Add(name, new Room(logger){}.AddClient(creator));
+                rooms.Add(name, new Room(logger){}.AddClient(creator, contextItems));
             }
             else
             {
@@ -43,12 +44,12 @@ namespace ManewryMorskie.Server
             }
         }
 
-        public async Task JoinToRoom(string name, IGroupManager groups, Client newClient)
+        public async Task JoinToRoom(string name, IGroupManager groups, Client newClient, IDictionary<object, object?> contextItems)
         {
             if(namedRooms.ContainsKey(name))
             {
                 if (namedRooms[name].IsWaitingForPlayers)
-                    await Join(namedRooms[name], newClient, groups, name);
+                    await Join(namedRooms[name], newClient, groups, name, contextItems);
                 else
                     await newClient.Kick("Pokój jest zajęty.");
             }
@@ -58,20 +59,20 @@ namespace ManewryMorskie.Server
             }
         }
 
-        public async Task JoinToRandomRoom(IGroupManager groups, Client newClient)
+        public async Task JoinToRandomRoom(IGroupManager groups, Client newClient, IDictionary<object, object?> contextItems)
         {
             var randomRoom = randomRooms.Where(x => x.Value.IsWaitingForPlayers).FirstOrDefault();
 
             if(randomRoom.Value == default)
                 await newClient.Kick("Brak wolnego losowego pokoju.");
             else
-                await Join(randomRoom.Value, newClient, groups, randomRoom.Key);
+                await Join(randomRoom.Value, newClient, groups, randomRoom.Key, contextItems);
         }
         
-        private async Task Join(Room room, Client newClient, IGroupManager groups, string groupName)
+        private async Task Join(Room room, Client newClient, IGroupManager groups, string groupName, IDictionary<object, object?> contextItems)
         {
             await groups.AddToGroupAsync(newClient.Id, groupName);
-            room.AddClient(newClient);
+            room.AddClient(newClient, contextItems);
 
             if(!room.IsWaitingForPlayers)
                 await room.RunGame();
