@@ -48,9 +48,13 @@ namespace ManewryMorskie
                 map[mineLocation].Unit = mine;
             }
 
-            foreach (IUserInterface ui in players.UniqueInferfaces)
-                await ui.ExecuteMove(move);
+            Move toSend = new(move) {
+                SourceUnitDescription = move.Result == BattleResult.None ? "-" : move.SourceUnitDescription
+            };
 
+            foreach (IUserInterface ui in players.UniqueInferfaces)
+                await ui.ExecuteMove(toSend);
+                
             PreviousLastExecuted = LastExecuted;
             LastExecuted = new(move);
         }

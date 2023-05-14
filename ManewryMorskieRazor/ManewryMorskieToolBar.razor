@@ -11,58 +11,58 @@
         <UnitsPowerTable/>
     </Content>
 </MyBSModal>
-<MyBSModal Id="destroyed-units-modal" Header="Zniszczone Jednostki">
+<MyBSModal Id="destroyed-units-modal" Header="Stracone Jednostki">
     <Content>
         <DestroyedUnits Source="destroyedUnits"/>
     </Content>
 </MyBSModal>
 <OnlineGameModal />
 
-<BSNavbar Color="BSColor.Dark" IsDark="true">
+<nav class="navbar navbar-dark navbar-expand-md bg-dark">
     <form class="container-fluid flex-row justify-content-between">
-        <BSNavbarBrand MarginLeftAndRight="Margins.ExtraSmall" Class="d-none d-md-inline">Manewry Morskie</BSNavbarBrand>
-        <BSNav Class="d-flex flex-row">
-            <BSNavItem IsDropdown="true">
-                <BSButtonGroup>
-                    <BSDropdown IsDiv="true" Class="dropdown-menu-dark">
-                        <Toggler>
-                            <BSToggle IsButton="true" IsOutlined="true" Color="BSColor.Light" MarginLeftAndRight="Margins.Small">
-                                <span class="oi oi-media-play"></span>
-                                <span class="d-none d-md-inline">  Nowa Gra</span>
-                            </BSToggle>
-                        </Toggler>
-                        <Content>
-                            <BSDropdownItem @onclick="async () => await StartLocalGame()">Hot Seat</BSDropdownItem>
-                            <BSDropdownItem Attributes='ToggleAtributes("#online-game-modal")'>Online</BSDropdownItem>
-                        </Content>
-                    </BSDropdown>
-                </BSButtonGroup>
-            </BSNavItem> 
-            <BSNavItem IsDropdown="true">
-                <BSButtonGroup>
-                    <BSDropdown IsDiv="true" Class="dropdown-menu-dark">
-                        <Toggler>
-                            <BSToggle IsButton="true" IsOutlined="true" Color="BSColor.Light" MarginLeftAndRight="Margins.Small">
-                                <span class="oi oi-info"></span>
-                                <span class="d-none d-md-inline">  Rozgrywka</span>
-                            </BSToggle>
-                        </Toggler>
-                        <Content>
-                            <BSDropdownItem Attributes='ToggleAtributes("#instruction-modal")'>Zasady gry</BSDropdownItem>
-                            <BSDropdownItem Attributes='ToggleAtributes("#table-modal")'>Tabela jednostek</BSDropdownItem>
-                            <BSDropdownItem IsDisabled="!isGameOngoing"
-                                @onclick="async () => destroyedUnits = await Game.DestroyedUnits()"
-                                Attributes='ToggleAtributes("#destroyed-units-modal")'>
-                                Zniszczone jednostki
-                            </BSDropdownItem>
-                        </Content>
-                    </BSDropdown>
-                </BSButtonGroup>
-            </BSNavItem>
+        <span class="navbar-brand mx-1 d-none d-md-inline">Manewry Morskie</span>
+        <ul class="nav d-flex flex-row">
+            <li class="nav-item dropdown">
+                <div class="btn-group">
+                    <button type="button" class="btn-outline-light btn mx-2 dropdown-toggle" data-bs-toggle="dropdown">
+                        <span class="oi oi-media-play"></span>
+                        <span class="d-none d-md-inline">  Nowa Gra</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-dark bottom-start">
+                        <li><a class="dropdown-item" href="javascript:void(0)" 
+                            @onclick="async () => await StartLocalGame()">Hot Seat</a></li>
+                        <li><a class="dropdown-item" href="javascript:void(0)" 
+                            data-bs-toggle="modal" data-bs-target="#online-game-modal" >Online</a></li>
+                    </ul>
+                </div>
+            </li>
+            <li class="nav-item dropdown">
+                <div class="btn-group">
+                    <button type="button" class="btn-outline-light btn mx-2 dropdown-toggle" data-bs-toggle="dropdown">
+                        <span class="oi oi-info"></span>
+                        <span class="d-none d-md-inline">  Rozgrywka</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-dark bottom-start">
+                        <li><a class="dropdown-item" href="javascript:void(0)"
+                               data-bs-toggle="modal" data-bs-target="#instruction-modal">Zasady gry</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="javascript:void(0)"
+                               data-bs-toggle="modal" data-bs-target="#table-modal">Tabela jednostek</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item @(isGameOngoing?string.Empty:"disabled")" 
+                               href="javascript:void(0)"
+                               @onclick="async () => destroyedUnits = await Game.DestroyedUnits()"
+                               data-bs-toggle="modal" data-bs-target="#destroyed-units-modal">Stracone jednostki</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
             <BoardTransformTools />
-        </BSNav>
+        </ul>
     </form>
-</BSNavbar>
+</nav>
 
 @code 
 {
@@ -73,11 +73,6 @@
     {
         Game.GameStarted += GameStarted;
         Game.GameClosed += GameStopped;
-    }
-
-    private Dictionary<string, object> ToggleAtributes(string dataBsTargetValue)
-    {
-        return new() { { "data-bs-toggle", "modal" }, { "data-bs-target", dataBsTargetValue } };
     }
 
     private async ValueTask StartLocalGame()

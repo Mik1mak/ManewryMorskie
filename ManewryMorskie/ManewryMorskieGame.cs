@@ -72,6 +72,7 @@ namespace ManewryMorskie
                 if (!AsyncGame)
                 {
                     await Task.WhenAll(currentPlayerPlacingTask);
+                    token.ThrowIfCancellationRequested();
                     logger?.LogInformation("First Player setup pawns in async game.");
                     turnManager.NextTurn();
                 }
@@ -86,6 +87,7 @@ namespace ManewryMorskie
                     Task opositePlayerPlacingTask = opositePlacingMgr.PlacePawns(token);
                     token.ThrowIfCancellationRequested();
                     await Task.WhenAll(currentPlayerPlacingTask, opositePlayerPlacingTask);
+                    token.ThrowIfCancellationRequested();
                     logger?.LogInformation("All Players setup pawns.");
                     turnManager.NextTurn();
                 }
@@ -102,9 +104,9 @@ namespace ManewryMorskie
                 Move move = await turnMgr.MakeMove(token);
                 logger?.LogInformation("Move Made.");
                 await executor.Execute(move);
+                token.ThrowIfCancellationRequested();
                 logger?.LogInformation("Move Executed.");
                 turnManager.NextTurn();
-                token.ThrowIfCancellationRequested();
             }
 
             await playerManager.WriteToPlayers("Gra zakończona", MessageType.SideMessage);

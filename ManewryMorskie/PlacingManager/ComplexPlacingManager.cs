@@ -18,16 +18,24 @@ namespace ManewryMorskie.PlacingManagerComponents
         public ComplexPlacingManager(StandardMap map, PlayerManager players, Player currentPlayer, ILogger? logger = null)
         {
             this.currentPlayer = currentPlayer;
-
-            Dictionary<Type, int> unitsToPlace = new(Fleet.UnitLimits)
+            Dictionary<Type, int> standatdUnitsToPlace = new(Fleet.UnitLimits)
             {
                 [typeof(Mina)] = 0
             };
+            Dictionary<Type, int> testUnitsToPlace = new()
+            {
+                [typeof(OkretDesantowy)] = 1,
+                [typeof(Niszczyciel)] = 1,
+                [typeof(OkretRakietowy)] = 1,
+                [typeof(Bateria)] = 1,
+                [typeof(Tralowiec)] = 1,
+            };
+
             placingMangers = new Dictionary<string, IPlacingManager>()
             {
-                ["Ręczne ustawienie pionków"] = new ManualPlacingManager(unitsToPlace, map, players, currentPlayer),
-                ["Ręczne ustawianie pionków z cofaniem"] = new ManualUnselectablePlacingManager(unitsToPlace, map, players, currentPlayer),
-                ["Automatyczne ustawienie pionków"] = new AutoPlacingManager(unitsToPlace, map, players, currentPlayer),
+                ["Ręczne ustawianie pionków"] = new ManualUnselectablePlacingManager(standatdUnitsToPlace, map, players, currentPlayer),
+                ["Automatyczne ustawienie pionków"] = new AutoPlacingManager(standatdUnitsToPlace, map, players, currentPlayer),
+                ["Test"] = new AutoPlacingManager(testUnitsToPlace, map, players, currentPlayer),
             };
         }
 

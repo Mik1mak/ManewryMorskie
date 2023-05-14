@@ -1,10 +1,4 @@
-﻿using BlazorStrap;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.Extensions.DependencyInjection;
 
 namespace ManewryMorskieRazor
 {
@@ -12,7 +6,6 @@ namespace ManewryMorskieRazor
     {
         public static IServiceCollection AddManewryMorskieGame(this IServiceCollection services)
         {
-            services.AddBlazorStrap();
             services.AddScoped<BoardTransformService>();
             services.AddScoped<BootstrapInterop>();
             services.AddScoped<DialogService>();

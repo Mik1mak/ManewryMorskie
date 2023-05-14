@@ -143,7 +143,7 @@ namespace ManewryMorskieRazor
 
         public async ValueTask Clean()
         {
-            HashSet<Task> tasks = new();
+            List<Task> tasks = new();
 
             foreach (CellLocation l in boardService.Keys)
             {

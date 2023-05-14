@@ -5,6 +5,16 @@
     {
       "library": "bootstrap@5.2.0",
       "destination": "wwwroot/lib/bootstrap/"
+    },
+    {
+      "library": "popper.js@2.11.6",
+      "destination": "wwwroot/lib/popper.js/",
+      "files": [
+        "umd/enums.min.js",
+        "umd/enums.min.js.map",
+        "umd/popper.min.js",
+        "umd/popper.min.js.map"
+      ]
     }
   ]
 }

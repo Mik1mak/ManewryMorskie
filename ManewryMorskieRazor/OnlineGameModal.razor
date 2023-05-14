@@ -12,32 +12,48 @@
                 <h5 class="modal-title">Gra Online</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" title="Zamknij"></button>
             </div>
-            <BSForm Model="onlineModal">
+            <EditForm Model="onlineModal">
                 <div class="modal-body">
                     <div class="mb-3 @(onlineModal.RandomRoom?"text-muted":"")">
-                        <BSLabel>Nazwa Pokoju</BSLabel>
-                        <BSInput DisplayName="Nazwa Pokoju" @bind-Value="onlineModal.RoomName"
-                                 IsDisabled="onlineModal.RandomRoom"
-                                 AdditionalAttributes='new Attributes {{"maxlength","16"},{"placeholder","Nazwa Pokoju"},{"title","Nazwa Pokoju"}}'/>
+                        <label class="form-label">Nazwa Pokoju</label>
+                        <InputText 
+                            DisplayName="Nazwa Pokoju" @bind-Value="onlineModal.RoomName"
+                            AdditionalAttributes='onlineModal.RandomRoom?disabledTxtInputAtrs:txtInputAtrs' />
                     </div>
                     <div class="mb-3">
                         <InputCheckbox DisplayName="Losowy Pokój"
-                            AdditionalAttributes='new Attributes {{"class","form-check-input"},{"title","Losowy Pokój"}}'
+                            AdditionalAttributes='new Attributes {{"class","form-check-input"},
+                                {"title","Losowy Pokój"},{"id","random-room"}}'
                             @bind-Value="onlineModal.RandomRoom"/>
-                        <BSLabel>Losowy Pokój</BSLabel>
+                        <label class="form-check-label" for="random-room">Losowy Pokój</label>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <BSButton Color="BSColor.Secondary" @onclick="async () => await StartOnline(true)">Stwórz</BSButton>
-                    <BSButton Color="BSColor.Primary" @onclick="async () => await StartOnline(false)">Dołącz</BSButton>
+                    <button type="button" class="btn btn-secondary" 
+                        @onclick="async () => await StartOnline(true)">Stwórz</button>
+                    <button type="button" class="btn btn-primary" 
+                        @onclick="async () => await StartOnline(false)">Dołącz</button>
                 </div>
-            </BSForm>
+            </EditForm>
         </div>
     </div>
 </div>
 
 @code 
 {
+    private static readonly Attributes txtInputAtrs = new()
+    {
+        {"maxlength","16"},
+        {"placeholder","Nazwa Pokoju"},
+        {"title","Nazwa Pokoju"},
+        {"class","form-control"},
+    };
+
+    private static readonly Attributes disabledTxtInputAtrs = new(txtInputAtrs)
+    {
+        ["disabled"]=string.Empty,
+    };
+
     private async ValueTask StartOnline(bool createRoom)
     {
         await Bootstrap.ToogleModal("online-game-modal", false);

@@ -26,11 +26,14 @@ namespace ManewryMorskie.GameEndManagerComponents
 
         private async void CheckGameEnds(object sender, int currentTurn)
         {
+            if (GameIsEnded)
+                return;
+
             foreach (IGameEnd gameEnd in gameEnds)
             {
-                (bool gameEnded, Player? winner) = gameEnd.IsGameEnded(currentTurn);
+                (GameIsEnded, Player? winner) = gameEnd.IsGameEnded(currentTurn);
 
-                if (GameIsEnded = gameEnded)
+                if (GameIsEnded)
                 {
                     await gameEnd.Handle(winner);
                     return;

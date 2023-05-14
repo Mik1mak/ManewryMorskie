@@ -20,12 +20,33 @@ namespace ManewryMorskie.PlacingManagerComponents
 
         public async Task PlacePawns(CancellationToken token)
         {
-            await PlaceDefaultBatteries(currentPlayer);
+            if(unitsToPlace.ContainsKey(typeof(Bateria)))
+                await PlaceDefaultBatteries(currentPlayer, unitsToPlace[typeof(Bateria)]);
+
             while (unitsToPlace.Any(x => x.Value != 0))
             {
                 await PlaceUnit(map.Keys.First(l => map[l].Owner == currentPlayer && map[l].Unit == null),
                     unitsToPlace.First(x => x.Value != 0).Key, currentPlayer);
             }
+        }
+
+        private async ValueTask PlaceDefaultBatteries(Player currentPlayer, int batteriesToPlace)
+        {
+            if (batteriesToPlace <= 0)
+                return;
+
+            IEnumerable<CellLocation> entries = players.TopPlayer == currentPlayer ?
+                StandardMap.DefaultTopEnterences : StandardMap.DefaultBottomEnterences;
+
+            foreach (CellLocation location in entries)
+                foreach (Ways way in CellLib.Extensions.HorizontalDirections)
+                {
+                    await PlaceUnit(location + way, typeof(Bateria), currentPlayer);
+
+                    if (--batteriesToPlace == 0)
+                        return;
+                }
+                    
         }
 
         public void Dispose() { }

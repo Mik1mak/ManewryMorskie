@@ -1,28 +1,30 @@
 ﻿@inject BoardTransformService BoardTransform
 
-<BSNavItem IsDropdown="true">
-    <BSButton IsOutlined="true" Color="BSColor.Light" MarginLeftAndRight="Margins.Small"
-              @onclick="async () => await BoardTransform.Rotate(!BoardTransform.Horizontal)">
+<li class="nav-item dropdown">
+    <button type="button" class="btn-outline-light btn mx-2"
+            @onclick="async () => await BoardTransform.Rotate(!BoardTransform.Horizontal)">
         <span class="oi oi-loop-circular"></span>
         <span class="d-none d-lg-inline">  Obróć</span>
-    </BSButton>
-</BSNavItem>
-<BSNavItem IsDropdown="true">
-    <BSButtonGroup MarginLeftAndRight="Margins.Small">
-        <BSButton Color="BSColor.Light" IsOutlined="true" @onclick="async () => await ChangeZoom(-15)" IsDisabled="@CannotZoomOut">
+    </button>
+</li>
+<li class="nav-item dropdown">
+    <div class="btn-group mx-2">
+        <button type="button" class="btn btn-outline-light @(CannotZoomOut?"disabled":string.Empty)"
+                @onclick="async () => await ChangeZoom(-15)">
             <span class="oi oi-zoom-out"></span>
             <span class="d-none d-lg-inline"> Oddal</span>
-        </BSButton>
-        <BSButton Color="BSColor.Light" Class="d-none d-sm-block"
-                  IsOutlined="true" @onclick="async () => await ChangeZoom(DEFAULT_ZOOM-Zoom)">
+        </button>
+        <button type="button" class="btn btn-outline-light d-none d-sm-block" style="width:67px;"
+                @onclick="async () => await ChangeZoom(DEFAULT_ZOOM-Zoom)">
             @Zoom%
-        </BSButton>
-        <BSButton Color="BSColor.Light" IsOutlined="true" @onclick="async () => await ChangeZoom(15)" IsDisabled="@CannotZoomIn">
+        </button>
+        <button type="button" class="btn btn-outline-light @(CannotZoomIn?"disabled":string.Empty)"
+                @onclick="async () => await ChangeZoom(15)">
             <span class="oi oi-zoom-in"></span>
             <span class="d-none d-lg-inline"> Przybliż</span>
-        </BSButton>
-    </BSButtonGroup>
-</BSNavItem>
+        </button>
+    </div>
+</li>
 
 @code 
 {

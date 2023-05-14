@@ -1,82 +1,74 @@
 ﻿@page "/UnitsPowerTable"
 
-<table class="units">
-    <tr>
-        <th>Nazwa jednostki</th>
-        <th>Liczba pól przy 1 ruchu</th>
-        <th>"Siła jednostki"</th>
-        <th>Liczba jednostek</th>
-    </tr>
-    <tr>
-        <td>Pancernik</td>
-        <td>2</td>
-        <td>Ulega atakowi okrętu podwodnego</td>
-        <td>3</td>
-    </tr>
-    <tr>
-        <td>Okręt rakietowy</td>
-        <td>1</td>
-        <td>Ulega atakowi pancernika i okrętu podwodnego</td>
-        <td>3</td>
-    </tr>
-    <tr>
-        <td>Krążownik</td>
-        <td>2</td>
-        <td>Ulega atakowi pancernika, orkętu rakietowego i okrętu podwodnego</td>
-        <td>3</td>
-    </tr>
-    <tr>
-        <td>Niszczyciel</td>
-        <td>4</td>
-        <td>Ulega atakowi pancernika, okrętu rakietowego, krążownika oraz orkętu podwodnego, jeżeli ten zaatakuje pierwszy</td>
-        <td>4</td>
-    </tr>
-    <tr>
-        <td>Okręt podwodny</td>
-        <td>2</td>
-        <td>Ulega atakowi eskortowca oraz niszczyciela, jeżeli ten zaatakuje pierwszy</td>
-        <td>4</td>
-    </tr>
-    <tr>
-        <td>Eskortowiec</td>
-        <td>3</td>
-        <td>Ulega atakowi wszystkich jednostek oprócz okrętu podwodnego i trałowca</td>
-        <td>4</td>
-    </tr>
-    <tr>
-        <td>Trałowiec</td>
-        <td>2</td>
-        <td>Ulega atakowi wszystkich jednostek</td>
-        <td>4</td>
-    </tr>
-    <tr>
-        <td>Okręt desantowy</td>
-        <td>1</td>
-        <td>Ulega atakowi wszystkich jednostek. Nie atakuje nikogo</td>
-        <td>1</td>
-    </tr>
-    <tr>
-        <td>Bateria nabrzeżna</td>
-        <td>-</td>
-        <td>Bije wszystkie jednostki w zasięgu jednego pola, oprócz okrętu rakietowego, którego atakowi ulega</td>
-        <td>4</td>
-    </tr>
-    <tr>
-        <td>Mina</td>
-        <td>-</td>
-        <td>Zaatakowana bije wszystkie jednostki oprócz trałowca jeżeli ten ogłosi "Zdejmuję minę"</td>
-        <td>6</td>
-    </tr>
+<table class="units table">
+    <thead>
+        <tr>
+            <th>Nazwa jednostki</th>
+            <th>Liczba pól przy 1 ruchu</th>
+            <th>"Siła jednostki"</th>
+            <th>Liczba jednostek</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Pancernik</td>
+            <td>2</td>
+            <td>Ulega atakowi okrętu podwodnego</td>
+            <td>3</td>
+        </tr>
+        <tr>
+            <td>Okręt rakietowy</td>
+            <td>1</td>
+            <td>Ulega atakowi pancernika i okrętu podwodnego</td>
+            <td>3</td>
+        </tr>
+        <tr>
+            <td>Krążownik</td>
+            <td>2</td>
+            <td>Ulega atakowi pancernika, orkętu rakietowego i okrętu podwodnego</td>
+            <td>3</td>
+        </tr>
+        <tr>
+            <td>Niszczyciel</td>
+            <td>4</td>
+            <td>Ulega atakowi pancernika, okrętu rakietowego, krążownika oraz orkętu podwodnego, jeżeli ten zaatakuje pierwszy</td>
+            <td>4</td>
+        </tr>
+        <tr>
+            <td>Okręt podwodny</td>
+            <td>2</td>
+            <td>Ulega atakowi eskortowca oraz niszczyciela, jeżeli ten zaatakuje pierwszy</td>
+            <td>4</td>
+        </tr>
+        <tr>
+            <td>Eskortowiec</td>
+            <td>3</td>
+            <td>Ulega atakowi wszystkich jednostek oprócz okrętu podwodnego i trałowca</td>
+            <td>4</td>
+        </tr>
+        <tr>
+            <td>Trałowiec</td>
+            <td>2</td>
+            <td>Ulega atakowi wszystkich jednostek</td>
+            <td>4</td>
+        </tr>
+        <tr>
+            <td>Okręt desantowy</td>
+            <td>1</td>
+            <td>Ulega atakowi wszystkich jednostek. Nie atakuje nikogo</td>
+            <td>1</td>
+        </tr>
+        <tr>
+            <td>Bateria nabrzeżna</td>
+            <td>-</td>
+            <td>Bije wszystkie jednostki w zasięgu jednego pola, oprócz okrętu rakietowego, którego atakowi ulega</td>
+            <td>4</td>
+        </tr>
+        <tr>
+            <td>Mina</td>
+            <td>-</td>
+            <td>Zaatakowana bije wszystkie jednostki oprócz trałowca jeżeli ten ogłosi "Zdejmuję minę"</td>
+            <td>6</td>
+        </tr>
+    </tbody>
 </table>
-
-<style>
-    .units table, .units th, .units td {
-        border: 1px solid black;
-        border-collapse: collapse;
-        text-align: center;
-    }
-
-    .units th, .units td {
-        padding: 8px;
-    }
-</style>
