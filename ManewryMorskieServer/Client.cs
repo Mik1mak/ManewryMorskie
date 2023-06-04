@@ -9,6 +9,8 @@ namespace ManewryMorskie.Server
         public event Func<Task>? Disconnecting;
         public bool IsDisconnected { get; private set; }
 
+        public DateTime LastActivityUtc { get; private set; }
+
         private IClientProxy ClientProxy => hubContext.Clients.Client(Id);
         public string Id { get; private set; } = string.Empty;
         public CancellationToken CancellationToken { get; private set; }
@@ -18,6 +20,9 @@ namespace ManewryMorskie.Server
             : base(new NetworkUserInterface(hubContext))
         {
             this.hubContext = hubContext;
+            LastActivityUtc = DateTime.UtcNow;
+            this.UserInterface.ClickedLocation += (s,e) => LastActivityUtc = DateTime.UtcNow;
+            this.UserInterface.ChoosenOptionId += (s, e) => LastActivityUtc = DateTime.UtcNow;
         }
 
         public void SetCallerContext(HubCallerContext context)

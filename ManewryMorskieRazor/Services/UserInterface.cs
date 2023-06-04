@@ -14,6 +14,8 @@ namespace ManewryMorskieRazor
         private readonly DialogService dialogService;
         private readonly ConcurrentQueue<Move> moveBuffer = new();
 
+        private CancellationTokenSource tokenSource = new();
+
         public bool ActiveClickInput { get; set; } = true;
 
         public event EventHandler<CellLocation>? ClickedLocation;
@@ -56,57 +58,66 @@ namespace ManewryMorskieRazor
         {
             ActiveClickInput = false;
 
+            CancellationToken token = tokenSource.Token;
+
             if(!moveBuffer.IsEmpty)
             {
                 moveBuffer.Enqueue(mv);
                 return;
             }
 
-            while(true)
+            try
             {
-                int animationDuration = (mv.Path.Count() + 2) * 250;
-                await boardService[mv.From].AnimatePawn(mv.From.Concat(mv.Path).Concat(mv.To), animationDuration);
-
-                Pawn pawn = await boardService[mv.From].TakeOffPawn();
-                BoardCellService toCell = boardService[mv.To];
-
-                await toCell.PlacePawn(pawn);
-
-                foreach (CellLocation minedLocation in mv.SetMines)
+                while (true)
                 {
-                    await PlacePawn(minedLocation, pawn.Color, false, pawn.Color == mv.CurrentPlayerColor ? "mina" : string.Empty);
-                    await Task.Delay(200);
+                    int animationDuration = (mv.Path.Count() + 2) * 250;
+                    await boardService[mv.From].AnimatePawn(mv.From.Concat(mv.Path).Concat(mv.To), animationDuration);
+
+                    Pawn pawn = await boardService[mv.From].TakeOffPawn();
+                    BoardCellService toCell = boardService[mv.To];
+
+                    await toCell.PlacePawn(pawn);
+
+                    foreach (CellLocation minedLocation in mv.SetMines)
+                    {
+                        await PlacePawn(minedLocation, pawn.Color, false, pawn.Color == mv.CurrentPlayerColor ? "mina" : string.Empty);
+                        await Task.Delay(200, token);
+                    }
+
+
+                    if (mv.Result != BattleResult.None)
+                    {
+                        await toCell.PlacePawn(pawn.Copy(mv.SourceUnitDescription!));
+
+                        BoardCellService targetCell = boardService[(mv.Attack ?? mv.Disarm!).Value];
+                        await targetCell.PlacePawn(targetCell.Pawn!.Value.Copy(mv.TargetUnitDescription!));
+                        await Task.Delay(1800, token);
+
+                        if (mv.Result.HasFlag(BattleResult.SourceDestroyed))
+                            await TakeOff(toCell, mv.To);
+
+                        if (mv.Result.HasFlag(BattleResult.TargetDestroyed))
+                            await TakeOff(targetCell, (mv.Attack ?? mv.Disarm!).Value);
+                    }
+                    else
+                    {
+                        await Task.Delay(300, token);
+                    }
+
+                    await Task.Delay(200, token);
+
+                    if (moveBuffer.IsEmpty)
+                        break;
+                    else
+                        while (!moveBuffer.TryDequeue(out mv!)) ;
                 }
-                    
-
-                if (mv.Result != BattleResult.None)
-                {
-                    await toCell.PlacePawn(pawn.Copy(mv.SourceUnitDescription!));
-
-                    BoardCellService targetCell = boardService[(mv.Attack ?? mv.Disarm!).Value];
-                    await targetCell.PlacePawn(targetCell.Pawn!.Value.Copy(mv.TargetUnitDescription!));
-                    await Task.Delay(1800);
-
-                    if (mv.Result.HasFlag(BattleResult.SourceDestroyed))
-                        await TakeOff(toCell, mv.To);
-
-                    if (mv.Result.HasFlag(BattleResult.TargetDestroyed))
-                        await TakeOff(targetCell, (mv.Attack ?? mv.Disarm!).Value);
-                }
-                else
-                {
-                    await Task.Delay(300);
-                }
-
-                await Task.Delay(200);
-
-                if (moveBuffer.IsEmpty)
-                    break;
-                else
-                    while(!moveBuffer.TryDequeue(out mv!));
             }
-
-            ActiveClickInput = true;
+            catch (TaskCanceledException) { }
+            catch (Microsoft.JSInterop.JSException) { }
+            finally
+            {
+                ActiveClickInput = true;
+            }
         }
 
         private async ValueTask TakeOff(BoardCellService srvice, CellLocation start)
@@ -143,6 +154,8 @@ namespace ManewryMorskieRazor
 
         public async ValueTask Clean()
         {
+            tokenSource.Cancel();
+            moveBuffer.Clear();
             List<Task> tasks = new();
 
             foreach (CellLocation l in boardService.Keys)
@@ -156,6 +169,7 @@ namespace ManewryMorskieRazor
             tasks.Add(DisplayMessage(string.Empty, MessageType.Empty));
 
             await Task.WhenAll(tasks);
+            tokenSource = new CancellationTokenSource();
         }
     }
 }

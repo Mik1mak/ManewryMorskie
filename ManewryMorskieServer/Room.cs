@@ -11,6 +11,8 @@ namespace ManewryMorskie.Server
         private readonly List<Client> clients = new();
         public IReadOnlyList<Client> Clients => clients;
 
+        public DateTime LastClientCommonActivityUtc => clients.Min(c => c.LastActivityUtc);
+
         private CancellationTokenSource? tokenSource;
         private Task? gameTask;
 
@@ -34,6 +36,11 @@ namespace ManewryMorskie.Server
 
         private async Task Client_Disconnecting()
         {
+            await Terminate("Przeciwnik rozłączył się.");
+        }
+
+        public async Task Terminate(string reason)
+        {
             logger?.LogInformation("Room Disconnected"); ;
             tokenSource?.Cancel();
             ClientDisconnected = true;
@@ -42,7 +49,7 @@ namespace ManewryMorskie.Server
             {
                 client.Disconnecting -= Client_Disconnecting;
                 if (!client.IsDisconnected)
-                    await client.Kick("Przeciwnik rozłączył się.");
+                    await client.Kick(reason);
             }
         }
 
@@ -71,10 +78,14 @@ namespace ManewryMorskie.Server
                 {
                     await game.Start(token);
                 }
-                catch(Exception ex)
+                catch (OperationCanceledException ex) 
+                {
+                    logger?.LogDebug("Game cancelled. {ex}", ex);
+                }
+                catch (Exception ex)
                 {
                     logger?.LogError("Exception {ex}", ex);
-                    await Client_Disconnecting();
+                    await Terminate("Wystąpił nieoczekiwany błąd.");
                 }
             }, token);
         }

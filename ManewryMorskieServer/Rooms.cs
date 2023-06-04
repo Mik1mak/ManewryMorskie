@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using System;
 
 namespace ManewryMorskie.Server
 {
@@ -6,15 +7,22 @@ namespace ManewryMorskie.Server
     {
         private readonly Dictionary<string, Room> randomRooms = new();
         private readonly Dictionary<string, Room> namedRooms = new();
-        private readonly int roomsLimits;
+        private readonly Dictionary<string, Room>[] allRooms;
+        public int RoomsCount => allRooms.Sum(rms => rms.Count);
+
+        private readonly int roomsLimit;
+        private readonly TimeSpan inactivityTolerance;
+
         private readonly ILogger<Rooms> logger;
+        private readonly ILoggerFactory loggerFactory;
 
-        public int RoomsCount => randomRooms.Count + namedRooms.Count;
-
-        public Rooms(IConfiguration config, ILogger<Rooms> logger)
+        public Rooms(IConfiguration config, ILoggerFactory loggerFactory)
         {
-            roomsLimits = int.Parse(config["Rooms:Limit"]);
-            this.logger = logger;
+            roomsLimit = int.Parse(config["Rooms:Limit"]);
+            inactivityTolerance = TimeSpan.FromMinutes(double.Parse(config["Rooms:MaxPlayerInactivityMinutes"]));
+            this.logger = loggerFactory.CreateLogger<Rooms>();
+            this.loggerFactory = loggerFactory;
+            allRooms = new[] { randomRooms, namedRooms };
         }
 
         public async Task CreateRandomRoom(IGroupManager groups, Client creator, IDictionary<object, object?> contextItems)
@@ -33,14 +41,19 @@ namespace ManewryMorskie.Server
         private async Task CreateRoom(IGroupManager groups, Client creator, string name, 
             IDictionary<object, object?> contextItems, IDictionary<string, Room> rooms)
         {
-            if (RoomsCount < roomsLimits)
+            if (RoomsCount <= roomsLimit)
+                await ClearInactiveRooms(additionalMsg: " w trakcie kiedy osiągnięta została maksymalna ilość utworzonych pokojów przez wszystkich użytkowników.");
+
+            if (RoomsCount < roomsLimit)
             {
                 await groups.AddToGroupAsync(creator.Id, name);
-                rooms.Add(name, new Room(logger){}.AddClient(creator, contextItems));
+                ILogger roomLogger = this.loggerFactory.CreateLogger($"Room {name}");
+                rooms.Add(name, new Room(roomLogger) {}.AddClient(creator, contextItems));
             }
             else
             {
-                await creator.Kick("Osiągnięto maksymalną ilość pokoi. Proszę spróbować później.");
+                await creator.Kick("Osiągnięto maksymalną ilość pokoi utworzonych przez użytkowników. Proszę spróbować później.");
+                logger.LogCritical("Max room count reached ({limit}). Creation the {name} room rejected.", roomsLimit, name);
             }
         }
 
@@ -78,9 +91,23 @@ namespace ManewryMorskie.Server
                 await room.RunGame();
         }
 
+        public async Task ClearInactiveRooms(string additionalMsg = ".")
+        {
+            DateTime utcNow = DateTime.UtcNow;
+            foreach (var rooms in allRooms)
+                foreach (var kpv in rooms)
+                    if((utcNow - kpv.Value.LastClientCommonActivityUtc) > inactivityTolerance)
+                    {
+                        await kpv.Value.Terminate($"Przekroczono dozwolony czas nieaktywności ({inactivityTolerance.TotalMinutes} min){additionalMsg}");
+                        rooms.Remove(kpv.Key);
+                        logger?.LogInformation("Room {roomName} terminated due to exceeding the inactivity time ({time}min).",
+                            kpv.Key, inactivityTolerance.TotalMinutes);
+                    }
+        }
+
         public void ClearDisconnectedRooms()
         {
-            foreach (var rooms in new[] {namedRooms, randomRooms})
+            foreach (var rooms in allRooms)
             {
                 var disconnectedKeys = rooms.Where(kpv => kpv.Value.ClientDisconnected).Select(kpv => kpv.Key);
                 foreach (string key in disconnectedKeys)
