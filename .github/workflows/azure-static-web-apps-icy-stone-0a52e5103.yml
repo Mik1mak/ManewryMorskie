@@ -15,9 +15,12 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: true
+      - name: Set cache version   
+        run: |
+          sed -i ''s/{#CACHE_VERSION#}/${{Build.BuildId}}/'' ManewryMorskie.WebApp/wwwroot/service-worker.published.js
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
